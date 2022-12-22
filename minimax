@@ -1,0 +1,42 @@
+def search(self, game, alpha, beta, depth, max_depth):
+        """
+        The implementation of the minimax search with alpha-beta pruning
+        """
+        # Evaluate when possible
+        if depth > max_depth or game.is_lost():
+            return self.evaluate(game)
+
+        # Agent's turn
+        if game.active_player == AGENT:
+            moves = game.moves_available()
+            result_move = moves[0]
+            v = float('-inf')
+            # Go through all possible moves
+            for m in moves:
+                game_copy = game.copy()
+                game_copy.perform_move(m)
+                prev_v = v
+                v = max(v, self.search(game_copy, alpha, beta, depth + 1, max_depth))
+                if v > prev_v and depth == 1:
+                    result_move = m
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
+            if depth == 1:
+                return result_move, v
+            return v
+        else:
+            available_tiles = game.empty_tiles()
+            v = float('inf')
+            for tile in available_tiles:
+                game_copy = game.copy()
+                game_copy.fill_specific_empty_tile(tile)
+                # Switch player here
+                game_copy.switch_player()
+                v = min(v, self.search(game_copy, alpha, beta, depth + 1, max_depth))
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
+            if depth == 1:
+                return '', v
+            return v
